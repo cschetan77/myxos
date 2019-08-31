@@ -54,14 +54,14 @@ if(flag == 0) then
 		[FAT + 8 * i + 0] = argument;
 		[FAT + 8 * i + 1] = 0;
 		[FAT + 8 * i + 2] = freeDiskBlock;
-		load (SCRATCHPAD,freeDiskBlock);
+		load (1,freeDiskBlock);
 		alias j S8;
 		j = 0;
 		while(j <= 511) do 
-			[SCRATCHPAD + j] = -1;
+			[512 + j] = -1;
 			j = j + 1;
 		endwhile;
-		store (SCRATCHPAD,freeDiskBlock);
+		store (1,freeDiskBlock);
 		[DiskFreeList + freeDiskBlock] = 1;
 		store (5,19);
 		store (6,20);
