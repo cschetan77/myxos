@@ -25,26 +25,27 @@ endwhile;
 if(flag == 0) then 
 	alias DiskFreeList S5;
 	alias empty S6;
-	s6 = 1; //Not empty
+	empty = 1; //Not empty
 	DiskFreeList = 3072;
 	i = 24;
 	while(i <= 447) do 
 		if([DiskFreeList + i] == 0) then 
-			S6 = 0;
+			empty = 0;
 			break;
 		endif;
 		i = i + 1;
 	endwhile;
 	alias freeDiskBlock S7;
 	freeDiskBlock = DiskFreeList + i;
+	
 	//Free disk block not found 
-	if(S6 == 1) then 
-		physicalSp = ([PTBR + 2 * ((SP - 2) / 512)] * 512 + ((SP - 2) % 512);
-		[physicalSp] = -1;
+	if(empty == 1) then 
+		physicalSp = ([PTBR + 2 * ((SP - 2) / 512)] * 512) + ((SP - 2) % 512);
+		[physicalSp] = (-1);
 		ireturn;
 	endif;
 	//Free disk block found
-	if(S6 == 0) then 
+	if(empty == 0) then 
 		i = 0;
 		while(i <= 63) do 
 			if([FAT + 8 * i + 2] == -1) then 
@@ -66,7 +67,7 @@ if(flag == 0) then
 		[freeDiskBlock] = 1;
 		store (5,19);
 		store (6,20);
-		physicalSp = ([PTBR + 2 * ((SP - 2) / 512)] * 512 + ((SP - 2) % 512);
+		physicalSp = ([PTBR + 2 * ((SP - 2) / 512)] * 512) + ((SP - 2) % 512);
 		[physicalSp] = 0;
 		ireturn;
 		
@@ -75,7 +76,7 @@ if(flag == 0) then
 endif;
 //Existing file 
 if(flag == 1) then 
-	physicalSp = ([PTBR + 2 * ((SP - 2) / 512)] * 512 + ((SP - 2) % 512);
+	physicalSp = ([PTBR + 2 * ((SP - 2) / 512)] * 512) + ((SP - 2) % 512);
 	[physicalSp] = 0;
 endif;
 ireturn;			 		
