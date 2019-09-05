@@ -1,7 +1,3 @@
-//Timer Handler 
-load (9,3);
-load (10,4);
-
 //Exception Handler 
 load (7,1);
 load (8,2);
