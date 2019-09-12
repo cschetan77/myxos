@@ -24,7 +24,7 @@ load (16,10);
 
 //INT 4
 load (17,11);
-load (18,12):
+load (18,12);
 
 
 //Setting up INIT process 

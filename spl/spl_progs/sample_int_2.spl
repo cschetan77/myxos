@@ -1,4 +1,4 @@
-//Stack Pointer 
+ //Stack Pointer 
 alias physicalSp S0;
 physicalSp = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
 
@@ -41,14 +41,37 @@ if(sysCallNo == 2) then
         endif;
         //i == SWOFT index
         //flag == FAT INDEX
+        
+        //current PCB fill up
+        alias counter S5;
+        alias currentPCB S6;
+        currentPCB = READY_LIST + 32 * 0;
+        counter = 15;
+        //Search for empty entry in PCB for PPOFT
+        while(counter < 31) do 
+            if([currentPCB + counter] == -1) then 
+                break;
+            endif;
+            counter = counter + 2;
+        endwhile;
+        //No Space found in PCB
+        if(counter > 30) then 
+            [physicalSp - 2] = (-1);
+            ireturn;
+        endif;
+        [currentPCB + counter + 0] = i; //Pointer to SWOFT
+        [currentPCB + counter + 1] = 0; //LSEEK position
+        //Setting entry in SWOFT
+        [FILE_TABLE + i + 0] = flag;
+        [FILE_TABLE + i + 1] = [FILE_TABLE + i + 1] + 1;
+        
+        //Returning file descriptor 
+        [physicalSp - 2] = counter;
+        
     endif;
     //File not found 
     if(flag == -1) then 
         [physicalSp - 2] = (-1);
     endif;
     ireturn;
-endif;
-
-//Close System Call
-if(sysCallNo == 3) then 
 endif;
