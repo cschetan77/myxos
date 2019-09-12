@@ -47,11 +47,14 @@ if(sysCallNo == 2) then
         alias currentPCB S6;
         currentPCB = READY_LIST + 32 * 0;
         counter = 15;
+        alias fileDescriptor S7;
+        fileDescriptor = 0;
         //Search for empty entry in PCB for PPOFT
         while(counter < 31) do 
             if([currentPCB + counter] == -1) then 
                 break;
             endif;
+            fileDescriptor = fileDescriptor + 1;
             counter = counter + 2;
         endwhile;
         //No Space found in PCB
@@ -66,7 +69,7 @@ if(sysCallNo == 2) then
         [FILE_TABLE + i + 1] = [FILE_TABLE + i + 1] + 1;
         
         //Returning file descriptor 
-        [physicalSp - 2] = counter;
+        [physicalSp - 2] = fileDescriptor;
         
     endif;
     //File not found 
