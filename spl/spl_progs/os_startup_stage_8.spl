@@ -51,7 +51,8 @@ alias counter S0;
 counter = 0;
 while(counter < 128) do 
 	[FILE_TABLE + counter + 0] = -1;
-	[FILE_TABLE + counter + 0] = 0;
+	[FILE_TABLE + counter + 1] = 0;
+	counter = counter + 2;
 endwhile;
 
 //Per process open file table
