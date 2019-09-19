@@ -89,7 +89,7 @@ if(sysCallNo == 4) then
 	while(i < 64) do
 		if([FAT + i * 8 + 2] != -1) then 
 			if([FAT + i * 8 + 0] == argument) then
-				fatindex = i * 8;
+				fatindex = i;
 				break;
 			endif;
 		endif;
@@ -98,7 +98,7 @@ if(sysCallNo == 4) then
 	
 	//Correct Execution till now 
 
-
+	//fatindex * 8
 	//File not found 
 	if(fatindex == -1) then 
 		[physicalSp - 2] = -1;
@@ -131,32 +131,35 @@ if(sysCallNo == 4) then
 
  
 	//File not opened
+
 	//Loading basic block of file
 	alias basicblock S5;
-	basicblock = [FAT + fatindex + 2];
+	basicblock = [FAT + 8 * fatindex + 2];
 	load (1,basicblock);
 	alias j S6;
+	alias temp S7;
 	i = 0;
 	j = 0;
 	while(i < 512) do 
 		if([512 + i] != -1) then 
+			temp = [512 + i];
 			load(1,[512 + i]);
 			j = 0;
 			while(j < 512) do	
 				[512 + j] = "";
 				j = j + 1;
 			endwhile;
-			store(1,[512 + j]);
+			store(1,temp);
 			load(1,basicblock);
 
-			[3072 + [512 + i]] = 0; //Disk free list copy of memory
+			[3072 + [512 + i]] = 0; //setting data block in DiskFreeList
 			[512 + i] = -1; //invalidating data block number in basic block
 			endif;
 		i = i + 1;
 	endwhile;
 	[3072 + basicblock] = 0;
-	[FAT + fatindex + 0] = -1;
-	[FAT + fatindex + 2] = -1;
+	[FAT + 8 * fatindex + 0] = -1;
+	[FAT + 8 * fatindex + 2] = -1;
 	store(5,19);
 	store(6,20);
 	[physicalSp - 2] = 0;

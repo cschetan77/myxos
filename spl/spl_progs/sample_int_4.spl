@@ -5,9 +5,11 @@ alias sysCallNo S1;
 sysCallNo = [physicalSP - 1];
 alias arg1 S2;
 alias arg2 S3;
-arg1 = [physicalSP - 3];
-arg2 = [physicalSP - 4];
+arg2 = [physicalSP - 3];
+arg1 = [physicalSP - 4];
 
+breakpoint;
+//Correct Execution
 if(sysCallNo == 5) then
     //Invalid File Descriptor
     if(arg1 < 0 && arg1 > 7) then
@@ -27,13 +29,16 @@ if(sysCallNo == 5) then
     pointer = [READY_LIST + 32 * 0 + 15 + arg1 * 2 + 0];
     lseek = [READY_LIST + 32 * 0 + 15 + arg1 * 2 + 1];
 
+    //Correct Execution till now 
+
     alias fatindex S6;
     //getting fat entry from SWOFT
-    fatindex = [FILE_TABLE + pointer + 0];
+    fatindex = [FILE_TABLE + 2 * pointer + 0];
+
 
     //getting basicblock from FAT copy of memory
     alias basicblock S7;
-    basicblock = [FAT + fatindex + 2];
+    basicblock = [FAT + 8 * fatindex + 2];
 
     load(1,basicblock);
     alias datablock S8;
@@ -49,7 +54,7 @@ if(sysCallNo == 5) then
             endif;
             i = i + 1;
         endwhile;
-        //Not dound 
+        //Not found 
         if(i > 447) then 
             [physicalSP - 2] = -1;
             ireturn;
@@ -57,9 +62,9 @@ if(sysCallNo == 5) then
 
         //Found
         [3072 + i] = 1;
-        [512 + lseek/512] = i;
+        [512 + lseek/512] = i; //data block number in basicblock
         store(1,basicblock);
-        [FAT + fatindex + 1] = [FAT + fatindex + 1] + 512;
+        [FAT + 8 * fatindex + 1] = [FAT + 8 * fatindex + 1] + 512;
         store(5,19);
         store(6,20);
 

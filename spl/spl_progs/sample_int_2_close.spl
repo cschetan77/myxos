@@ -25,6 +25,9 @@ if(sysCallNo == 2) then
         endif; 
         i = i + 1;
     endwhile;
+
+    //Flag = index of FAT table flag * 8
+    //Correct Execution till now 
     //File found 
     if(flag != -1) then 
         i = 0;
@@ -39,50 +42,58 @@ if(sysCallNo == 2) then
             [physicalSp - 2] = (-1);
             ireturn;
         endif;
-        //i == SWOFT index
-        //flag == FAT INDEX
-        
+        //i == SWOFT index  *2
+        //flag == FAT INDEX *8
+
         //current PCB fill up
         alias counter S5;
         alias currentPCB S6;
         currentPCB = READY_LIST + 32 * 0;
-        counter = 15;
-        alias fileDescriptor S7;
-        fileDescriptor = 0;
+        counter = 0;
+
         //Search for empty entry in PCB for PPOFT
-        while(counter < 31) do 
-            if([currentPCB + counter] == -1) then 
+        while(counter < 8) do 
+            if([currentPCB + 15 + 2 * counter + 0] == -1) then 
                 break;
             endif;
-            fileDescriptor = fileDescriptor + 1;
-            counter = counter + 2;
+            counter = counter + 1;
         endwhile;
+
+        //correct execution tille now 
         //No Space found in PCB
-        if(counter > 30) then 
+        if(counter > 7) then 
             [physicalSp - 2] = (-1);
             ireturn;
         endif;
-        [currentPCB + counter + 0] = i; //Pointer to SWOFT
-        [currentPCB + counter + 1] = 0; //LSEEK position
+
+        [currentPCB + 15 + 2 * counter + 0] = i; //Pointer to SWOFT
+        [currentPCB + 15 + 2 * counter + 1] = 0; //LSEEK position
+
         //Setting entry in SWOFT
-        [FILE_TABLE + i + 0] = flag;
-        [FILE_TABLE + i + 1] = [FILE_TABLE + i + 1] + 1;
+        [FILE_TABLE + i * 2 + 0] = flag; //fat index
+        [FILE_TABLE + i * 2 + 1] = [FILE_TABLE + i * 2 + 1] + 1; //open file instance
         
+        //working correctly 
         //Returning file descriptor 
-        [physicalSp - 2] = fileDescriptor;
+        [physicalSp - 2] = counter;
         
     endif;
+
     //File not found 
     if(flag == -1) then 
         [physicalSp - 2] = (-1);
     endif;
     ireturn;
 endif;
+
+
+//Close System Call
 if(sysCallNo == 3) then
     if(argument < 0 && argument > 7) then 
         [physicalSp - 2] = (-1);
         ireturn;
     endif;
+    print(argument);
     //PPOFT index
     alias index S8;
     index = READY_LIST + 0 * 32 + 15 + 2 * argument;
@@ -96,9 +107,9 @@ if(sysCallNo == 3) then
     pFileTable = [index + 0];
     [index + 0] = -1;
     [index + 1] = -1;
-    [FILE_TABLE + pFileTable + 1] = [FILE_TABLE + pFileTable + 1] -1;
-    if([FILE_TABLE + pFileTable + 1] == 0) then 
-        [FILE_TABLE + pFileTable + 0] = -1;
+    [FILE_TABLE + pFileTable * 2 + 1] = [FILE_TABLE + pFileTable * 2 + 1] -1;
+    if([FILE_TABLE + pFileTable * 2 + 1] == 0) then 
+        [FILE_TABLE + pFileTable * 2 + 0] = -1;
     endif;
     ireturn;
 endif;
