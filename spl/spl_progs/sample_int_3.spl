@@ -79,7 +79,8 @@ if(sysCallNo == 7) then
     alias datablock S8;
     datablock = [512 + (lseek / 512)];
     load(1,datablock);
-
+    print([512 + (lseek % 512)]);
+    breakpoint;
     [physicalSp - 3] = [512 + (lseek % 512)];
 
     //Increamenting lseek position by 1

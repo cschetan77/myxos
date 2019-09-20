@@ -1,13 +1,15 @@
 integer main() {
     integer a,b,c,d,e,f;
-    b = Create("myFile1.dat");
-    print(b);
     breakpoint;
-    a = Open("myFile1.dat");
+    a = Create("myFile.dat");
     print(a);
     breakpoint;
-    c = Write(0,"madarchod");
-    print(c);
+    b = Open("myFile.dat");
+    print(b);
+    breakpoint;
+    d = Read(0,f);
+    breakpoint;
+    print(f);
     breakpoint;
     return 0;
 }
