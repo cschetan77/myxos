@@ -1,4 +1,4 @@
-alias physicalSp S0
+alias physicalSp S0;
 physicalSp = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
 
 //System Call No 
@@ -14,6 +14,8 @@ if(sysCallNo == 8) then
         endif;
         pcbIndex = pcbIndex + 1;
     endwhile;
+    
+    //Working Correctly 
 
     //NOT FOUND free PCB
     if(pcbIndex == 32) then 
@@ -24,85 +26,111 @@ if(sysCallNo == 8) then
     //Found 
     alias newPCB S3;
     newPCB = READY_LIST + 32 * pcbIndex;
-    [newPCB + 0] = pcbIndex; //setting PID 
+    [newPCB + 0] = pcbIndex; //setting PID
+
+
+    //Working correctly
 
     //Counting valid pages of parent process
-    alias i S4;
-    alias needPage S5;
-    needPage = 0;
+    alias i S2;
+    alias validPages S4;
+    validPages = 0;
     i = 0;
     while(i < PTLR) do 
         if([PTBR + i * 2 + 0] != -1) then 
-            needPage = needPage + 1;
+            validPages = validPages + 1;
         endif;
         i = i + 1;
     endwhile;
+ 
+    //Working Correctly
 
-    alias freePage S6;
-    //Checking memory for free pages 
+    //Counting Free pages in Memeory
+    alias freePages S5;
+    freePages = 0;
     i = 29;
     while(i < 64) do 
         if([MEM_LIST + i] == 0) then 
-            freePage = freePage + 1;
+            freePages = freePages + 1;
         endif;
         i = i + 1;
     endwhile;
 
-    //Enough Free pages not found 
-    if(freePage < needPage) then 
+    //Working Correctly
+
+
+
+    //Not enough pages in Memeory
+    if(validPages > freePages) then 
         [physicalSp - 2] = -1;
         ireturn;
     endif;
 
-    //Searching for first free page 
-    alias firstFreePage S8;
-    i = 29;
-    while(i < 64) do 
-        if([MEM_LIST + i] == 0) then    
-            break;
-        endif;
-        i = i + 1;
-    endwhile;
-
-    //Keeping track of first Index of block in memory 
-    firstFreePage = i;
 
 
-    //Reserving Pages in Memory Free list 
-    alias count S7;
-    count = 1;
-    while(count <= needPage) do 
-        [MEM_LIST + i] = 1;
-        count = count + 1;
-        i = i + 1;
-    endwhile;
+    alias newPTBR S6;
+    newPTBR = PAGE_TABLE + [newPCB + 0] * 8;
+    
+    //Working Correctly
 
-    //Copying Pages to new loaction
-    i = firstFreePage;
-    alias j S5;
-    alias k S6;
-    alias phyPage S7;
-    j = 0;
-    while(j < PTLR) do 
-        if([PTBR + j * 2 + 0] != -1) then 
-            phyAddr = [PTBR + j * 2 + 0];
+    alias indexMem S7;
+    alias parentPage S8;
+    alias k S9;
+    i = 0;
+    while(i < PTLR) do  
+        if([PTBR + i * 2 + 0] != -1) then 
+            indexMem = 29;
+            while(indexMem < 64) do 
+                if([MEM_LIST + indexMem] == 0) then 
+                    break;
+                endif;
+                indexMem = indexMem + 1;
+            endwhile;
+            [newPTBR + i * 2 + 0] = indexMem;
+            [newPTBR + i * 2 + 1] = [PTBR + i * 2 + 1];
+            //Copying data
             k = 0;
+            parentPage = [PTBR + i * 2 + 0];
             while(k < 512) do 
-                [0 + i * 512 + k] = [phyPage * 512 + k];
+                [0 + indexMem * 512 + k] = [0 + parentPage * 512 + k];
                 k = k + 1;
             endwhile;
-            i = i + 1;
+            [MEM_LIST + indexMem] = 1;
+        else 
+            [newPTBR + i * 2 + 0] = -1;
+            [newPTBR + i * 2 + 1] = "00";
         endif;
-        j = j + 1;
+        i = i + 1;
     endwhile;
+    
+    //Working Correctly
 
-    alias newPID S5;
-    alias newPTBR S6;
-    newPID = [newPCB + 0];
-    newPTBR = 1024 + newPID * 8;
+
+    //Copying Registers 
+    [newPCB + 5] = newPTBR;
+    [newPCB + 6] = PTLR;
+    [newPCB + 4] = [physicalSp];
+    [newPCB + 3] = [physicalSp - 1];
+    [newPCB + 2] = BP;
+    [newPCB + 7] = R0;
+    [newPCB + 8] = R1;
+    [newPCB + 9] = R2;
+    [newPCB + 10] = R3;
+    [newPCB + 11] = R4;
+    [newPCB + 12] = R5;
+    [newPCB + 13] = R6;
+    [newPCB + 14] = R7;
 
     
+    [physicalSp - 2] = [newPCB + 0];
 
+    
+    alias childSp S7;
+    childSp = [newPCB + 3];
+    alias physicalChildSp S8;
+    physicalChildSp = ([newPTBR + 2 * (childSp / 512)] * 512) + (childSp % 512);
+
+    [physicalChildSp - 1] = -2;
+    [newPCB + 1] = 1;
 endif;
-
 ireturn;
