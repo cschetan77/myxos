@@ -1,0 +1,108 @@
+alias physicalSp S0
+physicalSp = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
+
+//System Call No 
+alias sysCallNo S1;
+sysCallNo = [physicalSp - 1];
+
+if(sysCallNo == 8) then 
+    alias pcbIndex S2;
+    pcbIndex = 1;
+    while(pcbIndex < 32) do 
+        if([READY_LIST + pcbIndex * 32 + 1] == 0) then 
+            break;
+        endif;
+        pcbIndex = pcbIndex + 1;
+    endwhile;
+
+    //NOT FOUND free PCB
+    if(pcbIndex == 32) then 
+        [physicalSp - 2] = -1;
+        ireturn;
+    endif;
+
+    //Found 
+    alias newPCB S3;
+    newPCB = READY_LIST + 32 * pcbIndex;
+    [newPCB + 0] = pcbIndex; //setting PID 
+
+    //Counting valid pages of parent process
+    alias i S4;
+    alias needPage S5;
+    needPage = 0;
+    i = 0;
+    while(i < PTLR) do 
+        if([PTBR + i * 2 + 0] != -1) then 
+            needPage = needPage + 1;
+        endif;
+        i = i + 1;
+    endwhile;
+
+    alias freePage S6;
+    //Checking memory for free pages 
+    i = 29;
+    while(i < 64) do 
+        if([MEM_LIST + i] == 0) then 
+            freePage = freePage + 1;
+        endif;
+        i = i + 1;
+    endwhile;
+
+    //Enough Free pages not found 
+    if(freePage < needPage) then 
+        [physicalSp - 2] = -1;
+        ireturn;
+    endif;
+
+    //Searching for first free page 
+    alias firstFreePage S8;
+    i = 29;
+    while(i < 64) do 
+        if([MEM_LIST + i] == 0) then    
+            break;
+        endif;
+        i = i + 1;
+    endwhile;
+
+    //Keeping track of first Index of block in memory 
+    firstFreePage = i;
+
+
+    //Reserving Pages in Memory Free list 
+    alias count S7;
+    count = 1;
+    while(count <= needPage) do 
+        [MEM_LIST + i] = 1;
+        count = count + 1;
+        i = i + 1;
+    endwhile;
+
+    //Copying Pages to new loaction
+    i = firstFreePage;
+    alias j S5;
+    alias k S6;
+    alias phyPage S7;
+    j = 0;
+    while(j < PTLR) do 
+        if([PTBR + j * 2 + 0] != -1) then 
+            phyAddr = [PTBR + j * 2 + 0];
+            k = 0;
+            while(k < 512) do 
+                [0 + i * 512 + k] = [phyPage * 512 + k];
+                k = k + 1;
+            endwhile;
+            i = i + 1;
+        endif;
+        j = j + 1;
+    endwhile;
+
+    alias newPID S5;
+    alias newPTBR S6;
+    newPID = [newPCB + 0];
+    newPTBR = 1024 + newPID * 8;
+
+    
+
+endif;
+
+ireturn;
