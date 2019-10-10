@@ -14,6 +14,10 @@ load (20,14);
 load (21,15);
 load (22,16);
 
+//FAT Table
+load (5,19);
+
+
 //Setting up INIT process
 [READY_LIST + 0] = 0;
 load (25,21);

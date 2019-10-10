@@ -7,5 +7,6 @@ integer main() {
 		endif;
 		i=i+1;
 	endwhile;
+	i = Exec("even.xsm");
 	return 0;
 }
