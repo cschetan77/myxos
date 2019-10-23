@@ -45,66 +45,38 @@ if(sysCallNo == 8) then
  
     //Working Correctly
 
-    //Counting Free pages in Memeory
-    alias freePages S5;
-    freePages = 0;
-    i = 29;
+    //Searching free page in memory 
+    i = 25;
     while(i < 64) do 
         if([MEM_LIST + i] == 0) then 
-            freePages = freePages + 1;
+            break;
         endif;
         i = i + 1;
     endwhile;
 
-    //Working Correctly
-
-
-
-    //Not enough pages in Memeory
-    if(validPages > freePages) then 
-        [physicalSp - 2] = -1;
+    //No free page found 
+    if(i >= 64) then 
+        [physicalChildSp - 2] = -1;
         ireturn;
     endif;
 
+    //Reserving block for stack only
+    [MEM_LIST + i] = 1;
 
+    alias newStackPage S5;
+    newStackPage = i;
+
+    //Copying Stack Page 
+    i = 0;
+    while(i < 511) do 
+        [newStackPage + i] = [[PTBR + 3 * 2 + 0] + i];
+        i = i + 1;
+    endwhile;
 
     alias newPTBR S6;
     newPTBR = PAGE_TABLE + [newPCB + 0] * 8;
     
     //Working Correctly
-
-    alias indexMem S7;
-    alias parentPage S8;
-    alias k S9;
-    i = 0;
-    while(i < PTLR) do  
-        if([PTBR + i * 2 + 0] != -1) then 
-            indexMem = 29;
-            while(indexMem < 64) do 
-                if([MEM_LIST + indexMem] == 0) then 
-                    break;
-                endif;
-                indexMem = indexMem + 1;
-            endwhile;
-            [newPTBR + i * 2 + 0] = indexMem;
-            [newPTBR + i * 2 + 1] = [PTBR + i * 2 + 1];
-            //Copying data
-            k = 0;
-            parentPage = [PTBR + i * 2 + 0];
-            while(k < 512) do 
-                [0 + indexMem * 512 + k] = [0 + parentPage * 512 + k];
-                k = k + 1;
-            endwhile;
-            [MEM_LIST + indexMem] = 1;
-        else 
-            [newPTBR + i * 2 + 0] = -1;
-            [newPTBR + i * 2 + 1] = "00";
-        endif;
-        i = i + 1;
-    endwhile;
-    
-    //Working Correctly
-
 
     //Copying Registers 
     [newPCB + 5] = newPTBR;
@@ -121,6 +93,19 @@ if(sysCallNo == 8) then
     [newPCB + 13] = R6;
     [newPCB + 14] = R7;
 
+    [newPTBR + 3 * 2 + 0] = newStackPage;
+    [newPTBR + 3 * 2 + 1] = "01";
+
+    i = 0;
+    while(i < 3) do 
+        if([PTBR + 2 * i + 1] == "01" || [PTBR + 2 * i + 1] == "11") then 
+            [MEM_LIST + [PTBR + 2 * i + 0]] = [MEM_LIST + [PTBR + 2 * i + 0]] + 1;
+        endif;
+        [newPTBR + i * 2 + 0] = [PTBR + 2 * i + 0];
+        [newPTBR + i * 2 + 1] = [PTBR + 2 * i + 1];
+        i = i + 1;
+    endwhile;
+    
     
     [physicalSp - 2] = [newPCB + 0];
 
