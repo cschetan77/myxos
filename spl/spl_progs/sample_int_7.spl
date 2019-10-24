@@ -62,6 +62,8 @@ endwhile;
 //Schedule the next process
 
 alias nextPCB S5;
+nextPCB = READY_LIST + 32 * nextPID;
+
 BP = [nextPCB + 2];
 SP = [nextPCB + 3];
 PTBR = [nextPCB + 5];
