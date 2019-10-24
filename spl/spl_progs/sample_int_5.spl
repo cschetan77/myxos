@@ -96,16 +96,23 @@ if(sysCallNo == 8) then
     [newPTBR + 3 * 2 + 0] = newStackPage;
     [newPTBR + 3 * 2 + 1] = "01";
 
+     load(6,20);
     i = 0;
     while(i < 3) do 
+        //If entry is valid 
         if([PTBR + 2 * i + 1] == "01" || [PTBR + 2 * i + 1] == "11") then 
             [MEM_LIST + [PTBR + 2 * i + 0]] = [MEM_LIST + [PTBR + 2 * i + 0]] + 1;
+        endif;
+        //If entry is invalid 
+        if(([PTBR + 2 * i + 1] == "00" || [PTBR + 2 * i + 1] == "10") && [PTBR + 2 * i + 0] > 447) then 
+           
+            [DISK_LIST + [PTBR + 2 * i + 1]] = [DISK_LIST + [PTBR + 2 * i + 1]] + 1;
         endif;
         [newPTBR + i * 2 + 0] = [PTBR + 2 * i + 0];
         [newPTBR + i * 2 + 1] = [PTBR + 2 * i + 1];
         i = i + 1;
     endwhile;
-    
+    store(6,20);
     
     [physicalSp - 2] = [newPCB + 0];
 
@@ -126,11 +133,13 @@ if(sysCallNo == 8) then
         [newPCB + i] = [parrentPCB + i];
         i = i + 1;
     endwhile;
-    i = 15;
+    i = 0;
     alias fileIndex S9;
-    while(i < 31) do 
-        fileIndex = [newPCB + i * 2 + 0];
-        [FILE_TABLE + 2 * fileIndex + 1] = [FILE_TABLE + 2 * fileIndex + 1] + 1;
+    while(i < 8) do 
+        fileIndex = [newPCB + 15 + i * 2 + 0];
+        if(fileIndex != -1) then 
+            [FILE_TABLE + 2 * fileIndex + 1] = [FILE_TABLE + 2 * fileIndex + 1] + 1;
+        endif;
         i = i + 1;
     endwhile;
 
