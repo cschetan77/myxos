@@ -106,7 +106,7 @@ if(sysCallNo == 8) then
         //If entry is invalid 
         if(([PTBR + 2 * i + 1] == "00" || [PTBR + 2 * i + 1] == "10") && [PTBR + 2 * i + 0] > 447) then 
            
-            [DISK_LIST + [PTBR + 2 * i + 1]] = [DISK_LIST + [PTBR + 2 * i + 1]] + 1;
+            [DISK_LIST + [PTBR + 2 * i + 0]] = [DISK_LIST + [PTBR + 2 * i + 0]] + 1;
         endif;
         [newPTBR + i * 2 + 0] = [PTBR + 2 * i + 0];
         [newPTBR + i * 2 + 1] = [PTBR + 2 * i + 1];
