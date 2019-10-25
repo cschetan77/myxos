@@ -53,7 +53,7 @@ if(sysCallNo == 9) then
         endif;
 
         [PTBR + 2 * i + 1] = "00";
-        [PTBR + 2 * i + 1] = [512 + i];
+        [PTBR + 2 * i + 0] = [512 + i];
         i = i + 1;
     endwhile;
 

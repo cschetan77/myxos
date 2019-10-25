@@ -8,14 +8,14 @@ Ip_addr = (EFR / 1000);
 
 if(Cause == 1 || Cause == 2 || Cause == 3 || Cause == 4) then 
     //Exit the process 
-    inline "JMP T_INTERUPT";
+    inline "JMP 11776";
 endif;
 
 
 //Memory Fault 
 if(Cause == 0) then
     if([PTBR + Vpagenum * 2 + 0] == -1) then 
-        inline "JMP T_INTERUPT";
+        inline "JMP 11776";
     endif;
 
     //Searching for a free page in Memory free list
@@ -62,7 +62,7 @@ if(Cause == 0) then
             newPTBR = (newPTBR + 8) % 32;
         endwhile;
         if(PTBR == newPTBR) then 
-            inline "JMP T_INTERUPT";
+            inline "JMP 11776";
         endif;
 
         //Searching free block in swap 
@@ -76,7 +76,7 @@ if(Cause == 0) then
             swapIndex = swapIndex + 1;
         endwhile;
         if(swapIndex == 512) then
-            inline "JMP T_INTERUPT";
+            inline "JMP 11776";
         endif;
     
         store(victimPage,swapIndex);
