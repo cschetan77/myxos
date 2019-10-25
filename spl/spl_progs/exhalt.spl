@@ -1,2 +1,64 @@
-print("Exception");
-halt;
+alias Cause S7;
+alias Vpagenum S8;
+alias Ip_addr S9;
+
+Cause = EFR % 10;
+Vpagenum = (EFR / 10) % 100;
+Ip_addr = (EFR / 1000);
+
+if(Cause == 1 || Cause == 2 || Cause == 3 || Cause == 4) then 
+    //Exit the process 
+    inline "INT 7";
+endif;
+
+
+//Memory Fault 
+if(Cause == 0) then
+    if([PTBR + Vpagenum * 2 + 0] == -1) then 
+        inline "INT 7";
+    endif;
+
+    //Searching for a free page in Memory free list
+    alias i S0;
+    i = 0;
+    while(i < 64) do 
+        if([MEM_LIST + i] == 0) then 
+            break;
+        endif;
+        i = i + 1;
+    endwhile;
+
+    alias newPage S1;
+    //page found
+    if(i < 64) then 
+        newPage = i;
+    endif;
+
+    //Page replacement algorithm 
+    if(i > 64) then 
+
+    endif;
+
+    alias diskBlock S2;
+    diskBlock = [PTBR + Vpagenum * 2 + 0];
+    load(newPage,diskBlock);
+    
+
+    //Swap Disk diskBlock
+    if(diskBlock > 447 && diskBlock < 512) then 
+        load(6,20);
+        [DISK_LIST + diskBlock] = [DISK_LIST + diskBlock] - 1;
+        store(6,20);
+    endif;
+
+    [PTBR + Vpagenum * 2 + 0] = newPage;
+    [PTBR + Vpagenum * 2 + 1] = "11";
+
+    SP = SP + 1;
+    alias physicalSp S3;
+    physicalSp = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
+
+    [physicalSp] = Ip_addr;
+    ireturn;
+
+endif;
