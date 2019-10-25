@@ -65,6 +65,7 @@ if(Cause == 0) then
             inline "JMP T_INTERUPT";
         endif;
 
+        //Searching free block in swap 
         alias swapIndex S10;
         swapIndex = 448;
         load(6,20);
@@ -84,7 +85,7 @@ if(Cause == 0) then
         [newPTBR + 2 * j + 0] = swapIndex;
         [newPTBR + 2 * j + 1] = "00";
         newPage = victimPage;
-
+        store(6,20);
     endif;
 
     alias diskBlock S2;
