@@ -38,35 +38,21 @@ if(Cause == 0) then
     if(i >= 64) then 
         alias victimPage;
         victimPage = -1;
-        alias newPTBR = (PTBR + 8) % 32;
-        alias j S4;
-        while(PTBR != newPTBR) do
-            j = 0;
-            while(j < 3) do 
-                if([newPTBR + 2 * j + 1] == "00" || [newPTBR + 2 * j + 1] == "01") then 
-                    victimPage = [newPTBR + 2 * j + 0];
+        i = PTBR + 2 * Vpagenum + 2;
+        while(1) do 
+            if(i % 8 ! = 6) then 
+                if([i + 1] == "00" && [MEM_LIST + [i + 0]] < = 1) then 
+                    victimPage = [MEM_LIST + 0];
                     break;
                 endif;
-                if([newPTBR + 2 * j + 1] == "10") then 
-                    [newPTBR + 2 * j + 1] == "00";
-                endif;
-                if([newPTBR + 2 * j + 1] == "11") then 
-                    [newPTBR + 2 * j + 1] == "01";
-                endif;
-
-                j = j + 1;
-            endwhile;
-            if(victimPage != -1) then 
-                break;
+                if([i + 1])
             endif;
-            newPTBR = (newPTBR + 8) % 32;
+            i = i + 2;
         endwhile;
-        if(PTBR == newPTBR) then 
-            inline "JMP 11776";
-        endif;
 
-        //Searching free block in swap 
-        alias swapIndex S10;
+
+
+
         swapIndex = 448;
         load(6,20);
         while(swapIndex < 512) do 
