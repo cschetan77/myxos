@@ -2,6 +2,7 @@ integer main() {
     integer pid;
     print ("Before Fork()");
     pid = Fork();
+    pid = Fork();
     print(pid);
    // breakpoint;
     print("After Fork()");

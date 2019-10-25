@@ -23,7 +23,7 @@ if(nextPID == currentPID) then
     halt;
 endif;
 
-
+breakpoint;
 
 
 //Searching and closing files
@@ -60,7 +60,6 @@ while(i < PTLR) do
 endwhile;
 
 //Schedule the next process
-
 alias nextPCB S5;
 nextPCB = READY_LIST + 32 * nextPID;
 
