@@ -45,7 +45,8 @@ if(Cause == 0) then
                     victimPage = [MEM_LIST + 0];
                     break;
                 endif;
-                if([i + 1])
+                [i + 1] = "01";
+                
             endif;
             i = i + 2;
         endwhile;
