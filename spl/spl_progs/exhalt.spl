@@ -8,14 +8,14 @@ Ip_addr = (EFR / 1000);
 
 if(Cause == 1 || Cause == 2 || Cause == 3 || Cause == 4) then 
     //Exit the process 
-    inline "INT 7";
+    inline "JMP T_INTERUPT";
 endif;
 
 
 //Memory Fault 
 if(Cause == 0) then
     if([PTBR + Vpagenum * 2 + 0] == -1) then 
-        inline "INT 7";
+        inline "JMP T_INTERUPT";
     endif;
 
     //Searching for a free page in Memory free list
@@ -35,7 +35,55 @@ if(Cause == 0) then
     endif;
 
     //Page replacement algorithm 
-    if(i > 64) then 
+    if(i >= 64) then 
+        alias victimPage;
+        victimPage = -1;
+        alias newPTBR = (PTBR + 8) % 32;
+        alias j S4;
+        while(PTBR != newPTBR) do
+            j = 0;
+            while(j < 3) do 
+                if([newPTBR + 2 * j + 1] == "00" || [newPTBR + 2 * j + 1] == "01") then 
+                    victimPage = [newPTBR + 2 * j + 0];
+                    break;
+                endif;
+                if([newPTBR + 2 * j + 1] == "10") then 
+                    [newPTBR + 2 * j + 1] == "00";
+                endif;
+                if([newPTBR + 2 * j + 1] == "11") then 
+                    [newPTBR + 2 * j + 1] == "01";
+                endif;
+
+                j = j + 1;
+            endwhile;
+            if(victimPage != -1) then 
+                break;
+            endif;
+            newPTBR = (newPTBR + 8) % 32;
+        endwhile;
+        if(PTBR == newPTBR) then 
+            inline "JMP T_INTERUPT";
+        endif;
+
+        alias swapIndex S10;
+        swapIndex = 448;
+        load(6,20);
+        while(swapIndex < 512) do 
+            if([DISK_LIST + swapIndex] == 0) then '
+                break;
+            endif;
+            swapIndex = swapIndex + 1;
+        endwhile;
+        if(swapIndex == 512) then
+            inline "JMP T_INTERUPT";
+        endif;
+    
+        store(victimPage,swapIndex);
+        [DISK_LIST + swapIndex] = 1;
+
+        [newPTBR + 2 * j + 0] = swapIndex;
+        [newPTBR + 2 * j + 1] = "00";
+        newPage = victimPage;
 
     endif;
 
