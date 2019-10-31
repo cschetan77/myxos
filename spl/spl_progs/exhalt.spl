@@ -38,57 +38,71 @@ if(Cause == 0) then
     if(i >= 64) then 
         alias victimPage;
         victimPage = -1;
-        i = PTBR + 2 * Vpagenum + 2;
-        while(1) do 
-            if(i % 8 ! = 6) then 
-                if([i + 1] == "00" && [MEM_LIST + [i + 0]] < = 1) then 
-                    victimPage = [MEM_LIST + 0];
+        i = PTBR + 2 * Vpagenum + 2; //Adress of next page 
+        if(i >= 1280) then 
+            i = 1024;
+        endif;
+        while(1) do
+            if(i % 8 != 6 && [MEM_LIST + [i]] <= 1) then //Not a Stack Page and Not a shared Page 
+                if([i + 1] == "01") then 
+                    victimPage = [i];
                     break;
+                else 
+                    [i + 1] = "01";
                 endif;
-                [i + 1] = "01";
-                
             endif;
             i = i + 2;
+            if(i >= 1280) then 
+                i = 1024;
+            endif;
         endwhile;
 
-
-
-
+        //Searching for a free swap block
+        alias swapIndex S10;
         swapIndex = 448;
         load(6,20);
         while(swapIndex < 512) do 
-            if([DISK_LIST + swapIndex] == 0) then '
+            if([DISK_LIST + swapIndex] == 0) then 
                 break;
             endif;
             swapIndex = swapIndex + 1;
         endwhile;
-        if(swapIndex == 512) then
+
+        //No Swap Block found 
+        if(swapIndex >= 512) then
             inline "JMP 11776";
         endif;
     
         store(victimPage,swapIndex);
         [DISK_LIST + swapIndex] = 1;
 
-        [newPTBR + 2 * j + 0] = swapIndex;
-        [newPTBR + 2 * j + 1] = "00";
-        newPage = victimPage;
+        //Updating entries in PPPT
+        [i] = swapIndex;
+        [i + 1] = "00";    
         store(6,20);
     endif;
 
-    alias diskBlock S2;
-    diskBlock = [PTBR + Vpagenum * 2 + 0];
-    load(newPage,diskBlock);
-    
 
-    //Swap Disk diskBlock
-    if(diskBlock > 447 && diskBlock < 512) then 
-        load(6,20);
-        [DISK_LIST + diskBlock] = [DISK_LIST + diskBlock] - 1;
-        store(6,20);
+    //New VictimPage now found 
+
+    alias page S2;
+    page = [PTBR + 2 * Vpagenum + 0];
+
+    //Swap Disk block found 
+    load(6,20);
+    if(page >= 448 && page <= 511) then 
+        [DISK_LIST + page] = [DISK_LIST + page] - 1;
     endif;
+    store(6,20);
 
-    [PTBR + Vpagenum * 2 + 0] = newPage;
-    [PTBR + Vpagenum * 2 + 1] = "11";
+    //Loading the victim page
+    load (victimPage,page);
+
+    //Updating Current process page table 
+    [PTBR + 2 * Vpagenum + 0] = victimPage;
+    [PTBR + 2 * Vpagenum + 1] = "11";
+
+
 
     SP = SP + 1;
     alias physicalSp S3;
