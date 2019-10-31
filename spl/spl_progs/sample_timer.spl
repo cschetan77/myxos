@@ -3,7 +3,9 @@ alias currentPID S0;
 currentPID = (PTBR - 1024) / 8;
 alias currentPCB S1;
 currentPCB = READY_LIST + 32 * currentPID;
-[currentPCB + 1] = 1;
+
+//Saving in PCB
+[currentPCB + 1] = 1; //State
 [currentPCB + 2] = BP;
 [currentPCB + 3] = SP - 1;
 alias physicalSP S2;
@@ -19,17 +21,20 @@ physicalSP = ([PTBR + 2 * (SP / 512)] * 512) + (SP % 512);
 [currentPCB + 12] = R5;
 [currentPCB + 13] = R6;
 [currentPCB + 14] = R7;
-//Scheduling next process
+
+
+//finding next process
 alias nextPID S3;
 nextPID = (currentPID + 1) % 32;
 
-while([READY_LIST + 32 * nextPID + 1] == 0) do 
+while([READY_LIST + 32 * nextPID + 1] != 1) do 
     nextPID = (nextPID + 1) % 32;
 endwhile;
 
 alias nextPCB S4;
 nextPCB = READY_LIST + nextPID * 32;
 
+//Scheduling next Process
 R0 = [nextPCB + 7];
 R1 = [nextPCB + 8];
 R2 = [nextPCB + 9];

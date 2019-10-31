@@ -4,26 +4,23 @@ currentPID = (PTBR - 1024) / 8;
 alias currentPCB S1;
 currentPCB = READY_LIST + 32 * currentPID;
 
+[READY_LIST + 32 * currentPID + 1] = 1; //Process in ready list
 
 
 alias nextPID S4;
 nextPID = (currentPID + 1) % 32;
 
-//Working correctly 
 
 //Searching for next process 
-while([READY_LIST + 32 * nextPID + 1] == 0) do 
+while([READY_LIST + 32 * nextPID + 1] != 1) do 
     nextPID = (nextPID + 1) % 32;
 endwhile;
 
-//Working correctly
 
 //If no Process Found 
 if(nextPID == currentPID) then
     halt;
 endif;
-
-breakpoint;
 
 
 //Searching and closing files
