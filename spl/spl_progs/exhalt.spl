@@ -36,7 +36,7 @@ if(Cause == 0) then
 
     //Page replacement algorithm 
     if(i >= 64) then 
-        alias victimPage;
+        alias victimPage S4;
         victimPage = -1;
         i = PTBR + 2 * Vpagenum + 2; //Adress of next page 
         if(i >= 1280) then 
