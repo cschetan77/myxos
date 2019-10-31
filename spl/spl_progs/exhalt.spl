@@ -28,15 +28,14 @@ if(Cause == 0) then
         i = i + 1;
     endwhile;
 
-    alias newPage S1;
+    alias victimPage S4;
     //page found
     if(i < 64) then 
-        newPage = i;
+        victimPage = i;
     endif;
 
     //Page replacement algorithm 
     if(i >= 64) then 
-        alias victimPage S4;
         victimPage = -1;
         i = PTBR + 2 * Vpagenum + 2; //Adress of next page 
         if(i >= 1280) then 
