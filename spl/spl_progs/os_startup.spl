@@ -16,36 +16,42 @@ load (22,16);
 
 //FAT Table
 load (5,19);
+
+
 //Setting up INIT process
-[READY_LIST + 0] = 0;
+[READY_LIST + 0] = 0; //PID
+
+load (25,21);
+load (26,22);
+load (27,23);
+
 PTBR = 1024;
 PTLR = 4;
-[PTBR + 0] = 21;
-[PTBR + 1] = "00";
-[PTBR + 2] = 22;
-[PTBR + 3] = "00";
-[PTBR + 4] = 23;
-[PTBR + 5] = "00";
+[PTBR + 0] = 25;
+[PTBR + 1] = "01";
+[PTBR + 2] = 26;
+[PTBR + 3] = "01";
+[PTBR + 4] = 27;
+[PTBR + 5] = "01";
 [PTBR + 6] = 28;
 [PTBR + 7] = "01";
 [READY_LIST + 1] = 2;
 SP = 3 * 512;
-[28 * 512] = 0;
+[28 * 512] = 0;//Setting IP
+
+[READY_LIST + 32 * 0 + 1] = 2; //Running 
 
 //Initializing Memory Free list
 alias i S0;
 i = 0;
-while(i < 25) do 
+while(i < 29) do 
 	[MEM_LIST + i] = 1;
 	i = i + 1;
 endwhile;
-
 while(i < 64) do 
 	[MEM_LIST + i] = 0;
 	i = i + 1;
 endwhile;
-
-[MEM_LIST + 28] = 1; //For stack
 
 //Setting all PCBs
 i = 1;
@@ -59,17 +65,6 @@ endwhile;
 load (9,3);
 load (10,4);
 
-//Disk free list
-load(6,20);
-
-//Initializing Swap Area
-i = 448;
-while(i < 511) do 
-	[DISK_LIST + i] = 0;
-	i = i + 1;
-endwhile;
-
-store(6,20);
 
 ireturn;
 

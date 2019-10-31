@@ -4,26 +4,23 @@ currentPID = (PTBR - 1024) / 8;
 alias currentPCB S1;
 currentPCB = READY_LIST + 32 * currentPID;
 
+[READY_LIST + 32 * currentPID + 1] = 1; //Process in ready list
 
 
 alias nextPID S4;
 nextPID = (currentPID + 1) % 32;
 
-//Working correctly 
 
 //Searching for next process 
-while([READY_LIST + 32 * nextPID + 1] == 0) do 
+while([READY_LIST + 32 * nextPID + 1] != 1) do 
     nextPID = (nextPID + 1) % 32;
 endwhile;
 
-//Working correctly
 
 //If no Process Found 
 if(nextPID == currentPID) then
     halt;
 endif;
-
-
 
 
 //Searching and closing files
@@ -52,21 +49,7 @@ i = 0;
 while(i < PTLR) do
     page = [PTBR + i * 2 + 0];
     if(page != -1) then 
-        //Memory page 
-        if([PTBR + i * 2 + 1] == "01" || [PTBR + 2 * i + 1] == "11") then 
-            [MEM_LIST + page] = [MEM_LIST + page] - 1;
-            if([MEM_LIST + page] < 0) then 
-                [MEM_LIST + page] = 0;
-            endif;
-        endif;
-        //Swap block page 
-        if([PTBR + i * 2 + 1] == "00" || [PTBR + 2 * i + 1] == "10")  then
-            if([PTBR + 2 * i + 0] > 447) then 
-                load(6,20);
-                [DISK_LIST + page] = [DISK_LIST + page] -1;
-                store(6,20);
-            endif;
-        endif;
+        [MEM_LIST + page] = 0;
     endif;
     [PTBR + i * 2 + 0] = -1;
     [PTBR + i * 2 + 1] = "00";
@@ -74,7 +57,6 @@ while(i < PTLR) do
 endwhile;
 
 //Schedule the next process
-
 alias nextPCB S5;
 nextPCB = READY_LIST + 32 * nextPID;
 
