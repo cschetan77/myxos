@@ -45,16 +45,23 @@ endwhile;
 
 //Freeing memory Pages and invalidating its Page table 
 alias page S2;
+load(6,20);
 i = 0;
 while(i < PTLR) do
-    page = [PTBR + i * 2 + 0];
-    if(page != -1) then 
-        [MEM_LIST + page] = 0;
+    if([PTBR + 2 * i + 1] == "00") then 
+        if([PTBR + 2 * i + 0] >= 448) then 
+            [DISK_LIST + [PTBR + 2 * i + 0]] = [DISK_LIST + [PTBR + 2 * i + 0]] - 1;
+        endif;
+    endif;
+    if([PTBR + 2 * i + 1] == "01" || [PTBR + 2 * i + 1] == "11") then
+        [MEM_LIST + [PTBR + 2 * i + 0]] = [MEM_LIST + [PTBR + 2 * i + 0]] - 1;  
     endif;
     [PTBR + i * 2 + 0] = -1;
     [PTBR + i * 2 + 1] = "00";
     i = i + 1;
 endwhile;
+store(6,20);
+
 
 //Schedule the next process
 alias nextPCB S5;
