@@ -14,9 +14,14 @@ endif;
 
 //Memory Fault 
 if(Cause == 0) then
+
+    //Working 
     if([PTBR + Vpagenum * 2 + 0] == -1) then 
         inline "JMP 11776";
     endif;
+
+
+    //Working correctly
 
     //Searching for a free page in Memory free list
     alias i S0;
@@ -32,10 +37,15 @@ if(Cause == 0) then
     //page found
     if(i < 64) then 
         victimPage = i;
+        [MEM_LIST + i] = 1;
     endif;
+
+    //Working correctly
 
     //Page replacement algorithm 
     if(i >= 64) then 
+        print("Page Replacement algo");
+        breakpoint;
         victimPage = -1;
         i = PTBR + 2 * Vpagenum + 2; //Adress of next page 
         if(i >= 1280) then 
@@ -96,6 +106,8 @@ if(Cause == 0) then
 
     //Loading the victim page
     load (victimPage,page);
+
+    //Working correctly 
 
     //Updating Current process page table 
     [PTBR + 2 * Vpagenum + 0] = victimPage;

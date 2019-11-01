@@ -21,12 +21,6 @@ load (5,19);
 //Setting up INIT process
 [READY_LIST + 0] = 0; //PID
 
-
-//No need to load these pages 
-//load (25,21);
-//load (26,22);
-//load (27,23);
-
 PTBR = 1024;
 PTLR = 4;
 [PTBR + 0] = 21;

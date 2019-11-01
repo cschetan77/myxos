@@ -28,7 +28,7 @@ JZ R0, 00082
 MOV R0, 2
 MOV R1, BP
 ADD R0, R1
-MOV R1, "odd.xsm"
+MOV R1, "sample.xsm"
 PUSH R1
 PUSH R0
 MOV R1, 9
